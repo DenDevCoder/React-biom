@@ -1,0 +1,85 @@
+import React, { useEffect, useState } from 'react';
+
+export default function JsonComponents() {
+  const [jsonData, setJsonData] = useState([]);
+  const [data, setData] = useState([]);
+
+  const[dataArray, setDataArray] = useState([])
+
+  const getData = () => {
+    fetch('/biom.json')
+      .then(response => response.json())
+      .then(data => setData(data.data))
+      .catch(error => console.error(error));
+  };
+
+  const getDataRows = () => {
+    fetch('/biom.json')
+      .then(response => response.json())
+      .then(data => setJsonData(data.rows))
+      .catch(error => console.error(error));
+  };
+
+  useEffect(() => {
+    getData();
+    getDataRows();
+  }, []);
+
+  useEffect(()=>{
+      const mas = []
+
+      data.forEach(item=>{
+        const key1 = item[0]
+        const key2 = item[1]
+        const value = item[2]
+
+        if(!mas[key1]){
+          mas[key1] = []
+        }
+
+        mas[key1][key2] = value
+      })
+
+      setDataArray(mas)
+  },[data])
+
+  // console.log(jsonData);
+  // console.log(data);
+  console.log(dataArray)
+
+  if (!jsonData || !data) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h2>JsonComponents Output:</h2>
+      {jsonData.map((item, index) => (
+        <div key={index}>
+          <div>ID: {item.id}</div>
+          <div>Taxonomy: {item.metadata.taxonomy.join(', ')}</div>
+          <div>Tax ID: {item.metadata.tax_id}</div>
+          <div>Title: {item.metadata.title}</div>
+          <div>Lineage:</div>
+          <ul>
+            {item.metadata.lineage.map((lineageItem, lineageIndex) => (
+              <li key={lineageIndex}>
+                {lineageItem.rank}: {lineageItem.name}
+              </li>
+            ))}
+          </ul>
+          {dataArray[index].join(" ")}
+        </div>
+      ))}
+
+      <h2>Data Output:</h2>
+      {data.map((item, index) => (
+        <div key={index}>
+          <div>SubItem 1: {item[0]}</div>
+          <div>SubItem 2: {item[1]}</div>
+          <div>SubItem 3: {item[2]}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
